@@ -110,6 +110,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun OptionsPage(){
+    val activeButton = remember { mutableStateOf("Real Estate") }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column (
             modifier = Modifier
@@ -170,27 +172,16 @@ fun OptionsPage(){
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically) {
-                        CustomOptionButton(
-                            color = Color.White,
-                            text = "Real Estate",
-                            backgroundColor = Color.Black
-                        )
-                        CustomOptionButton(
-                            color = Color.Black,
-                            text = "Apartment",
-                            backgroundColor = Color.White
-                        )
-                        CustomOptionButton(
-                            color = Color.Black,
-                            text = "House",
-                            backgroundColor = Color.White
-                        )
-                        CustomOptionButton(
-                            color = Color.Black,
-                            text = "Motels",
-                            backgroundColor = Color.White
-                        )
+                        CustomOptionButton(activeButton, "Real Estate")
+                        CustomOptionButton(activeButton, "Apartment")
+                        CustomOptionButton(activeButton, "House")
+                        CustomOptionButton(activeButton, "Motels")
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier
+                        .height(1.dp)
+                        .background(Color.LightGray)
+                        .fillMaxWidth())
                     Spacer(modifier = Modifier.height(16.dp))
                     Spacer(modifier = Modifier
                         .height(1.dp)
@@ -259,74 +250,79 @@ fun FixedPositionButton() {
 
 @Composable
 fun RadioSection(text: String){
-    val options = listOf("Option 1", "Option 2", "Option 3")
-    var selectedOption by remember { mutableStateOf(options[0]) }
+    var selectedOption by remember { mutableStateOf("") }
+
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(start = 16.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,){
         Text(text = text, style = MaterialTheme.typography.bodyLarge, color = Color.Black)
         Spacer(modifier = Modifier.weight(1f))
-        RadioButton(selected = (text == selectedOption), onClick = { /*TODO*/ })
+        RadioButton(selected = (text == selectedOption), onClick = { selectedOption = text })
+    }
+}
+
+
+@Composable
+fun PreferenceSection(text: String){
+    val activeButton = remember { mutableStateOf("") }
+
+    Text(text = text, style = MaterialTheme.typography.bodyLarge, color = Color.Black)
+    Spacer(modifier = Modifier.height(16.dp))
+    Row(modifier = Modifier
+        .fillMaxWidth()) {
+        CustomCircleButton(activeButton, "1")
+        Spacer(modifier = Modifier.width(3.dp))
+        CustomCircleButton(activeButton, "2")
+        Spacer(modifier = Modifier.width(3.dp))
+        CustomCircleButton(activeButton, "3")
+        Spacer(modifier = Modifier.width(3.dp))
+        CustomCircleButton(activeButton, "4+")
     }
 }
 
 @Composable
-fun PreferenceSection(text: String){
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = Color.Black)
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(modifier = Modifier
-            .fillMaxWidth()) {
-            CustomCircleButton(
-                text = "1"
-            )
-            Spacer(modifier = Modifier.width(3.dp))
-            CustomCircleButton(
-                text = "2"
-            )
-            Spacer(modifier = Modifier.width(3.dp))
-            CustomCircleButton(
-                text = "3"
-            )
-            Spacer(modifier = Modifier.width(3.dp))
-            CustomCircleButton(
-                text = "4+"
-            )
-        }
-}
+fun CustomCircleButton(activeButton: MutableState<String>, text: String){
+    val isActive = activeButton.value == text
+    val backgroundColor = if (isActive) Color.Black else Color.White
+    val textColor = if (isActive) Color.White else Color.Black
 
-@Composable
-fun CustomCircleButton(text: String){
     Button(
-        onClick = { /* Do something when clicked */ },
+        onClick = { activeButton.value = text },
         shape = CircleShape,
         modifier = Modifier
             .width(35.dp)
             .height(35.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.White, contentColor = Color.Black),
+        colors = ButtonDefaults.buttonColors(backgroundColor = backgroundColor, contentColor = textColor),
         contentPadding = PaddingValues(0.dp)
     ) {
-        Text(text = text, color = Color.Black, fontSize = 10.sp)
+        Text(text = text, color = textColor, fontSize = 10.sp)
     }
 }
 
 @Composable
-fun CustomOptionButton(color: Color, text: String, backgroundColor: Color){
+fun CustomOptionButton(activeButton: MutableState<String>, text: String){
+    val isActive = activeButton.value == text
+    val backgroundColor = if (isActive) Color.Black else Color.White
+    val textColor = if (isActive) Color.White else Color.Black
+
     Button(
-        onClick = {
-        },
+        onClick = { activeButton.value = text },
         modifier = Modifier
             .width(100.dp)
             .size(35.dp)
             .padding(start = 2.dp, end = 2.dp),
         shape = RoundedCornerShape(30.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = backgroundColor, contentColor = color)) {
-        Text(text = text, color = color, fontSize = 10.sp ) // Adjust fontSize here
+        colors = ButtonDefaults.buttonColors(backgroundColor = backgroundColor, contentColor = textColor)) {
+        Text(text = text, color = textColor, fontSize = 10.sp ) // Adjust fontSize here
     }
 }
 
+
 @Composable
 fun CustomSwitch() {
+    var isForRentActive by remember { mutableStateOf(true) }
+
     Row(modifier = Modifier
         .width(350.dp)
         .height(50.dp)
@@ -334,27 +330,51 @@ fun CustomSwitch() {
         .background(Color.LightGray),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically) {
+
+        if (isForRentActive) {
+            Spacer(modifier = Modifier.width(60.dp))
+            Text(text = "For Rent")
+        } else {
+            Button(
+                onClick = { isForRentActive = true },
+                modifier = Modifier
+                    .width(165.dp)
+                    .height(50.dp)
+                    .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(50.dp))
+                    .clip(RoundedCornerShape(50.dp)),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
+            ) {
+                Text("For Rent")
+            }
+        }
+
         Spacer(modifier = Modifier.width(60.dp))
-        Text(text = "For Rent")
-        Spacer(modifier = Modifier.width(60.dp))
-        Button(
-            onClick = { /* Do something when clicked */ },
-            modifier = Modifier
-                .width(165.dp)
-                .height(50.dp)
-                .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(50.dp))
-                .clip(RoundedCornerShape(50.dp)),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
-        ) {
-            Text("For Sale")
+
+        if (isForRentActive) {
+            Button(
+                onClick = { isForRentActive = false },
+                modifier = Modifier
+                    .width(165.dp)
+                    .height(50.dp)
+                    .border(width = 1.dp, color = Color.LightGray, shape = RoundedCornerShape(50.dp))
+                    .clip(RoundedCornerShape(50.dp)),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)
+            ) {
+                Text("For Sale")
+            }
+        } else {
+            Text(text = "For Sale")
+            Spacer(modifier = Modifier.width(60.dp))
         }
     }
 }
 
 
 
+
 @Composable
 fun HomePage(){
+    val activeButton = remember { mutableStateOf("Real Estate") }
     Box(modifier = Modifier.fillMaxSize()){
         Column(
             modifier = Modifier
@@ -378,10 +398,10 @@ fun HomePage(){
                 horizontalArrangement = Arrangement.spacedBy(0.dp), // Add space between items
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                item { CustomButton(color = Color.White, text = "Real Estate", backgroundColor = Color.Black, width = 180, fontSize = 12, size = 40) }
-                item { CustomButton(color = Color.Black, text = "Apartment", backgroundColor = Color.White, width = 180, fontSize = 12, size = 40) }
-                item { CustomButton(color = Color.Black, text = "House", backgroundColor = Color.White, width = 180, fontSize = 12, size = 40) }
-                item { CustomButton(color = Color.Black, text = "Motels", backgroundColor = Color.White, width = 180, fontSize = 12, size = 40) }
+                item { CustomHomeButton(activeButton, "Real Estate", width = 180, fontSize = 12, size = 40) }
+                item { CustomHomeButton(activeButton, "Apartment", width = 180, fontSize = 12, size = 40) }
+                item { CustomHomeButton(activeButton, "House", width = 180, fontSize = 12, size = 40) }
+                item { CustomHomeButton(activeButton, "Motels", width = 180, fontSize = 12, size = 40) }
             }
             Spacer(modifier = Modifier.height(16.dp))
             LazyRow(
@@ -410,6 +430,24 @@ fun HomePage(){
             BottomTabNavigation()
 
         }
+    }
+}
+
+@Composable
+fun CustomHomeButton(activeButton: MutableState<String>, text: String, width: Int = 180, fontSize: Int = 14, size: Int = 50){
+    val isActive = activeButton.value == text
+    val backgroundColor = if (isActive) Color.Black else Color.White
+    val textColor = if (isActive) Color.White else Color.Black
+
+    Button(
+        onClick = { activeButton.value = text },
+        modifier = Modifier
+            .width(width.dp)
+            .size(size.dp)
+            .padding(start = 16.dp, end = 16.dp),
+        shape = RoundedCornerShape(30.dp),
+        colors = ButtonDefaults.buttonColors(backgroundColor = backgroundColor, contentColor = textColor)) {
+        Text(text = text, modifier = Modifier.padding(0.dp), color = textColor, fontSize = fontSize.sp ) // Adjust fontSize here
     }
 }
 
